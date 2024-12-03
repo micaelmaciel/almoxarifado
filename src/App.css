@@ -1,0 +1,26 @@
+body {
+  background-color: #121212;
+  color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+}
+
+.table-container {
+  background-color: #333;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.MuiTableCell-root {
+  color: white;
+}
