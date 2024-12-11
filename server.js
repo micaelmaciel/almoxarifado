@@ -29,7 +29,7 @@ db.prepare(`
 `).run();
 
 db.prepare(`
-    CREATE TABLE IF NOT EXISTS remove_log (
+  CREATE TABLE IF NOT EXISTS add_log (
     date TEXT,
     product_name TEXT NOT NULL UNIQUE,
     quantity INTEGER,
@@ -39,7 +39,7 @@ db.prepare(`
 `).run();
 
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS add_log (
+  CREATE TABLE IF NOT EXISTS remove_log (
     date TEXT,
     product_name TEXT NOT NULL UNIQUE,
     quantity INTEGER,
@@ -55,13 +55,19 @@ const getProductById = db.prepare('SELECT * FROM products WHERE code = ?');
 const updateProduct = db.prepare('UPDATE products SET name = ?, quantity = ?, unit = ? WHERE code = ?');
 const deleteProduct = db.prepare('DELETE FROM products WHERE code = ?');
 
+const getProductByName = db.prepare('SELECT * FROM products WHERE name = ?');
+const updateQuantity = db.prepare('UPDATE products SET quantity = ? WHERE name = ?');
+
+const addQuantity = db.prepare('UPDATE products SET quantity = quantity + ? WHERE name = ?');
+
 // CRUD Routes
 
 // Create
 app.post('/api/produtos', (req, res) => {
   try {
     const { nome, quantidade, unidade } = req.body;
-    const info = insertProduct.run(nome, quantidade, unidade);
+    const capitalizedNome = nome.charAt(0).toUpperCase() + nome.slice(1);
+    const info = insertProduct.run(capitalizedNome, quantidade, unidade);
     res.json({ id: info.lastInsertRowid });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -88,6 +94,61 @@ app.post('/api/remove_log', (req, res) => {
   }
 });
 
+app.post('/api/produtos/subtract', (req, res) => {
+  try {
+    const { nome, quantidade } = req.body;
+    
+    // First get the current product
+    const product = getProductByName.get(nome);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Calculate new quantity
+    const newQuantity = product.quantity - parseInt(quantidade);
+    if (newQuantity < 0) {
+      return res.status(400).json({ error: 'Insufficient quantity' });
+    }
+
+    // Update the product quantity
+    const info = updateQuantity.run(newQuantity, nome);
+    if (info.changes === 0) {
+      return res.status(500).json({ error: 'Failed to update quantity' });
+    }
+
+    res.json({ 
+      message: 'Quantity updated successfully',
+      newQuantity: newQuantity 
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/produtos/add', (req, res) => {
+  try {
+    const { nome, quantidade } = req.body;
+    
+    // First get the current product
+    const product = getProductByName.get(nome);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Update the product quantity
+    const info = addQuantity.run(parseInt(quantidade), nome);
+    if (info.changes === 0) {
+      return res.status(500).json({ error: 'Failed to update quantity' });
+    }
+
+    res.json({ 
+      message: 'Quantity updated successfully',
+      newQuantity: product.quantity + parseInt(quantidade)
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 // Read
 app.get('/api/produtos', (req, res) => {

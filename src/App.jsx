@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react'; // Add useEffect
 import Box from '@mui/material/Box';
 import axios from 'axios';
@@ -6,7 +7,11 @@ import Sidebar from './Components/Sidebar';
 import BasicTable from './Components/BasicTable';
 import LogTable from './Components/LogTable';
 import ButtonUsage from './Components/BasicButton';
-import Form from './Components/Form';
+import Form from './Components/FormEntrada';
+import FormSaida from './Components/FormSaida';
+import LogTableSaida from './Components/LogTableSaida';
+import FormCadastro from './Components/FormCadastro';  // Add this import
+
 
 
 export function addItem(nome, quantidade, unidade) {
@@ -17,27 +22,60 @@ export function addItem(nome, quantidade, unidade) {
   });
 }
 
+export function updateQuantity(nome, quantidade) {
+  return axios.post('http://localhost:3001/api/produtos/add', {
+    nome: nome,
+    quantidade: quantidade
+  });
+}
+
 export function addLog(data, nome_produto, quantidade, setor, responsavel) {
   return axios.post('http://localhost:3001/api/add_log', {
-    data: data,
-    nome_produto: nome_produto,
-    quantidade: quantidade,
-    setor: setor,
-    responsavel: responsavel
+    data,
+    nome_produto,
+    quantidade,
+    setor,
+    responsavel
+  });
+}
+
+export function subtractItem(nome, quantidade) {
+  return axios.post('http://localhost:3001/api/produtos/subtract', {
+    nome: nome,
+    quantidade: quantidade
+  });
+}
+
+export function removeLog(data, nome_produto, quantidade, setor, responsavel) {
+  return axios.post('http://localhost:3001/api/remove_log', {
+    data,
+    nome_produto,
+    quantidade,
+    setor,
+    responsavel
   });
 }
 
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
-  const [open, setOpen] = useState(false);
+  const [openCadastro, setOpenCadastro] = useState(false);
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openRemove, setOpenRemove] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpenAdd = () => setOpenAdd(true);
+  const handleCloseAdd = () => setOpenAdd(false);
+
+  const handleOpenRemove = () => setOpenRemove(true);
+  const handleCloseRemove = () => setOpenRemove(false);
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
   };
+
+  const handleOpenCadastro = () => setOpenCadastro(true);
+  const handleCloseCadastro = () => setOpenCadastro(false);
+
 
   const renderContent = () => {
     switch (currentPage) {
@@ -45,10 +83,33 @@ function App() {
         return (
           <>
             <h1>Estoque</h1>
-            <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
+            <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
               <BasicTable refreshTrigger={refreshTrigger}/>
-              <ButtonUsage onClick={handleOpen} nome="Adicionar" />
-              <Form open={open} handleClose={handleClose} addItem={addItem} addLog={addLog} onSubmitSuccess={handleRefresh} />
+              <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
+                <ButtonUsage onClick={handleOpenCadastro} nome="Cadastrar" />
+                <ButtonUsage onClick={handleOpenAdd} nome="Entrada" />
+                <ButtonUsage onClick={handleOpenRemove} nome="Saída" />
+              </div>
+              <FormCadastro 
+                open={openCadastro} 
+                handleClose={handleCloseCadastro} 
+                addItem={addItem} 
+                onSubmitSuccess={handleRefresh} 
+              />
+              <Form 
+                open={openAdd} 
+                handleClose={handleCloseAdd} 
+                updateQuantity={updateQuantity}  // Change this line
+                addLog={addLog} 
+                onSubmitSuccess={handleRefresh} 
+              />              
+              <FormSaida 
+                open={openRemove} 
+                handleClose={handleCloseRemove} 
+                subtractItem={subtractItem} 
+                removeLog={removeLog} 
+                onSubmitSuccess={handleRefresh} 
+              />
             </div>
           </>
         );
@@ -61,8 +122,15 @@ function App() {
               </div>
             </>
           );
-      case 'saida':
-        return <h1>Histórico de saída</h1>;
+        case 'saida':
+          return (
+            <>
+              <h1>Histórico de saída</h1>
+              <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
+                <LogTableSaida refreshTrigger={refreshTrigger} />
+              </div>
+            </>
+          );
       default:
         return <h1>404 Not Found</h1>;
     }

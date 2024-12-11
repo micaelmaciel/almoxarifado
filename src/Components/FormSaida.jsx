@@ -20,40 +20,65 @@ const style = {
   color: 'white'
 };
 
-export default function Form({ open, handleClose, addItem, addLog, onSubmitSuccess }) {
+export default function FormSaida({ open, handleClose, subtractItem, removeLog, onSubmitSuccess }) {
   const [formData, setFormData] = useState({
     nome: '',
     quantidade: '',
-    unidade: '',
     setor: '',
-    data: new Date().toISOString().split('T')[0], // Initialize with today's date
+    data: new Date().toISOString().split('T')[0],
     responsavel: ''
   });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    await addItem(formData.nome, formData.quantidade, formData.unidade);
-    await addLog(
-      formData.data, 
-      formData.nome, 
-      formData.quantidade, 
-      formData.setor, 
-      formData.responsavel
-    );
-
-    setFormData({ nome: '', quantidade: '', unidade: '', setor: '', data: '', responsavel: '' });
-    onSubmitSuccess();
-    handleClose();
-  } catch (error) {
-    console.error('Detailed error:', error.response?.data || error);
-  }
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // First subtract the quantity from the product
+      await subtractItem(formData.nome, formData.quantidade);
+      
+      // Then add the log entry to remove_log
+      await removeLog(
+        formData.data,
+        formData.nome,
+        formData.quantidade,
+        formData.setor,
+        formData.responsavel
+      );
+  
+      setFormData({
+        nome: '',
+        quantidade: '',
+        setor: '',
+        data: new Date().toISOString().split('T')[0],
+        responsavel: ''
+      });
+      
+      onSubmitSuccess();
+      handleClose();
+    } catch (error) {
+      console.error('Error:', error);
+      if (error.response?.data?.error === 'Product not found') {
+        alert('Produto não encontrado!');
+      } else if (error.response?.data?.error === 'Insufficient quantity') {
+        alert('Quantidade insuficiente em estoque!');
+      } else {
+        alert('Erro ao processar saída');
+      }
+    }
+  };
 
   const handleChange = (e) => {
+    let value = e.target.value;
+    // Capitalize only text fields, not numbers or dates
+    if (e.target.type !== 'number' && e.target.type !== 'date') {
+      // Capitalize each word
+      value = value.split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
@@ -65,7 +90,7 @@ const handleSubmit = async (e) => {
     >
       <Box sx={style}>
         <Typography id="modal-title" variant="h6" component="h2" mb={2}>
-          Adicionar Produto
+          Remover Produto
         </Typography>
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -90,16 +115,6 @@ const handleSubmit = async (e) => {
               sx={{ input: { color: 'white' }, label: { color: 'white' }, flex: 1 }}
             />
           </Box>
-          <TextField
-            fullWidth
-            label="Unidade"
-            name="unidade"
-            value={formData.unidade}
-            onChange={handleChange}
-            margin="normal"
-            required
-            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
-          />
           <TextField
             fullWidth
             label="Data"
@@ -147,7 +162,7 @@ const handleSubmit = async (e) => {
               variant="contained"
               color="primary"
             >
-              Adicionar
+              Remover
             </Button>
           </Box>
         </form>
