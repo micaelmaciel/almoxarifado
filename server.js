@@ -22,10 +22,30 @@ const db = new Database('./database.db', { verbose: console.log });
 db.prepare(`
   CREATE TABLE IF NOT EXISTS products (
     code INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     quantity INTEGER,
     unit TEXT
-  )
+  );
+`).run();
+
+db.prepare(`
+    CREATE TABLE IF NOT EXISTS remove_log (
+    date TEXT,
+    product_name TEXT NOT NULL UNIQUE,
+    quantity INTEGER,
+    sector TEXT,
+    person TEXT
+  );
+`).run();
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS add_log (
+    date TEXT,
+    product_name TEXT NOT NULL UNIQUE,
+    quantity INTEGER,
+    sector TEXT,
+    person TEXT
+  );
 `).run();
 
 // Prepare statements
@@ -36,6 +56,8 @@ const updateProduct = db.prepare('UPDATE products SET name = ?, quantity = ?, un
 const deleteProduct = db.prepare('DELETE FROM products WHERE code = ?');
 
 // CRUD Routes
+
+// Create
 app.post('/api/produtos', (req, res) => {
   try {
     const { nome, quantidade, unidade } = req.body;
@@ -46,6 +68,28 @@ app.post('/api/produtos', (req, res) => {
   }
 });
 
+app.post('/api/add_log', (req, res) => {
+  try {
+    const { data, nome_produto, quantidade, setor, responsavel } = req.body;
+    db.prepare('INSERT INTO add_log (date, product_name, quantity, sector, person) VALUES (?, ?, ?, ?, ?)').run(data, nome_produto, quantidade, setor, responsavel);
+    res.json({ message: 'Log added' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/remove_log', (req, res) => {
+  try {
+    const { data, nome_produto, quantidade, setor, responsavel } = req.body;
+    db.prepare('INSERT INTO remove_log (date, product_name, quantity, sector, person) VALUES (?, ?, ?, ?, ?)').run(data, nome_produto, quantidade, setor, responsavel);
+    res.json({ message: 'Log added' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
+// Read
 app.get('/api/produtos', (req, res) => {
   try {
     const products = getAllProducts.all();
@@ -55,10 +99,26 @@ app.get('/api/produtos', (req, res) => {
   }
 });
 
-app.get('/api/home', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.get('/api/add_log', (req, res) => {
+  try {
+    const logs = db.prepare('SELECT * FROM add_log').all();
+    res.json(logs);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
+app.get('/api/remove_log', (req, res) => {
+  try {
+    const logs = db.prepare('SELECT * FROM remove_log').all();
+    res.json(logs);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+
+// Search
 app.get('/api/produtos/:id', (req, res) => {
   try {
     const product = getProductById.get(req.params.id);
@@ -68,6 +128,7 @@ app.get('/api/produtos/:id', (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
 
 app.put('/api/produtos/:id', (req, res) => {
   try {

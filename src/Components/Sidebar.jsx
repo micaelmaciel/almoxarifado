@@ -12,9 +12,9 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 const Sidebar = ({ currentPage, setCurrentPage }) => {
 
 const pages = [
-  { id: 'home', label: 'Início', icon: <HomeOutlinedIcon /> },
-  { id: 'stocks', label: 'Estoque', icon: <ShowChartOutlinedIcon /> },
-  { id: 'settings', label: 'Configurações', icon: <SettingsOutlinedIcon /> }
+  { id: 'home', label: 'Estoque', icon: <HomeOutlinedIcon /> },
+  { id: 'entrada', label: 'Entrada', icon: <ShowChartOutlinedIcon /> },
+  { id: 'saida', label: 'Saída', icon: <SettingsOutlinedIcon /> }
 ]
 
   return (
