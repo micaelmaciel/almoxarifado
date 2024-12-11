@@ -5,16 +5,17 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 const Sidebar = ({ currentPage, setCurrentPage }) => {
 
 const pages = [
   { id: 'home', label: 'Estoque', icon: <HomeOutlinedIcon /> },
-  { id: 'entrada', label: 'Entrada', icon: <ShowChartOutlinedIcon /> },
-  { id: 'saida', label: 'Saída', icon: <SettingsOutlinedIcon /> }
+  { id: 'entrada', label: 'Entrada', icon: <AddIcon /> },
+  { id: 'saida', label: 'Saída', icon: <RemoveIcon /> }
 ]
 
   return (

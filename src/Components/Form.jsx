@@ -20,24 +20,35 @@ const style = {
   color: 'white'
 };
 
-export default function Form({ open, handleClose, addItem, onSubmitSuccess }) {
+export default function Form({ open, handleClose, addItem, addLog, onSubmitSuccess }) {
   const [formData, setFormData] = useState({
     nome: '',
     quantidade: '',
-    unidade: ''
+    unidade: '',
+    setor: '',
+    data: new Date().toISOString().split('T')[0], // Initialize with today's date
+    responsavel: ''
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await addItem(formData.nome, formData.quantidade, formData.unidade);
-      setFormData({ nome: '', quantidade: '', unidade: '' });
-      onSubmitSuccess();
-      handleClose();
-    } catch (error) {
-      console.error('Error adding item:', error);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    await addItem(formData.nome, formData.quantidade, formData.unidade);
+    await addLog(
+      formData.data, 
+      formData.nome, 
+      formData.quantidade, 
+      formData.setor, 
+      formData.responsavel
+    );
+
+    setFormData({ nome: '', quantidade: '', unidade: '', setor: '', data: '', responsavel: '' });
+    onSubmitSuccess();
+    handleClose();
+  } catch (error) {
+    console.error('Detailed error:', error.response?.data || error);
+  }
+};
 
   const handleChange = (e) => {
     setFormData({
@@ -57,32 +68,67 @@ export default function Form({ open, handleClose, addItem, onSubmitSuccess }) {
           Adicionar Produto
         </Typography>
         <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Nome"
-            name="nome"
-            value={formData.nome}
-            onChange={handleChange}
-            margin="normal"
-            required
-            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
-          />
-          <TextField
-            fullWidth
-            label="Quantidade"
-            name="quantidade"
-            type="number"
-            value={formData.quantidade}
-            onChange={handleChange}
-            margin="normal"
-            required
-            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
-          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              fullWidth
+              label="Nome"
+              name="nome"
+              value={formData.nome}
+              onChange={handleChange}
+              margin="normal"
+              required
+              sx={{ input: { color: 'white' }, label: { color: 'white' }, flex: 2 }}
+            />
+            <TextField
+              label="Quantidade"
+              name="quantidade"
+              type="number"
+              value={formData.quantidade}
+              onChange={handleChange}
+              margin="normal"
+              required
+              sx={{ input: { color: 'white' }, label: { color: 'white' }, flex: 1 }}
+            />
+          </Box>
           <TextField
             fullWidth
             label="Unidade"
             name="unidade"
             value={formData.unidade}
+            onChange={handleChange}
+            margin="normal"
+            required
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
+          />
+          <TextField
+            fullWidth
+            label="Data"
+            name="data"
+            type="date" // Add this
+            value={formData.data}
+            onChange={handleChange}
+            margin="normal"
+            required
+            sx={{ 
+              input: { color: 'white' }, 
+              label: { color: 'white' } 
+            }}
+          />
+          <TextField
+            fullWidth
+            label="Responsável"
+            name="responsavel"
+            value={formData.responsavel}
+            onChange={handleChange}
+            margin="normal"
+            required
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
+          />
+          <TextField
+            fullWidth
+            label="Setor"
+            name="setor"
+            value={formData.setor}
             onChange={handleChange}
             margin="normal"
             required

@@ -1,10 +1,12 @@
 import React, { useState } from 'react'; // Add useEffect
 import Box from '@mui/material/Box';
+import axios from 'axios';
+
 import Sidebar from './Components/Sidebar';
 import BasicTable from './Components/BasicTable';
+import LogTable from './Components/LogTable';
 import ButtonUsage from './Components/BasicButton';
 import Form from './Components/Form';
-import axios from 'axios';
 
 
 export function addItem(nome, quantidade, unidade) {
@@ -12,6 +14,16 @@ export function addItem(nome, quantidade, unidade) {
     nome: nome,
     quantidade: quantidade,
     unidade: unidade
+  });
+}
+
+export function addLog(data, nome_produto, quantidade, setor, responsavel) {
+  return axios.post('http://localhost:3001/api/add_log', {
+    data: data,
+    nome_produto: nome_produto,
+    quantidade: quantidade,
+    setor: setor,
+    responsavel: responsavel
   });
 }
 
@@ -32,16 +44,23 @@ function App() {
       case 'home':
         return (
           <>
-            <h1>Início</h1>
+            <h1>Estoque</h1>
             <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
-              <BasicTable onRefresh={handleRefresh} refreshTrigger={refreshTrigger}/>
+              <BasicTable refreshTrigger={refreshTrigger}/>
               <ButtonUsage onClick={handleOpen} nome="Adicionar" />
-              <Form open={open} handleClose={handleClose} addItem={addItem} onSubmitSuccess={handleRefresh} />
+              <Form open={open} handleClose={handleClose} addItem={addItem} addLog={addLog} onSubmitSuccess={handleRefresh} />
             </div>
           </>
         );
-      case 'entrada':
-        return <h1>Histórico de entrada</h1>;
+        case 'entrada':
+          return (
+            <>
+              <h1>Histórico de entrada</h1>
+              <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
+              <LogTable refreshTrigger={refreshTrigger} />
+              </div>
+            </>
+          );
       case 'saida':
         return <h1>Histórico de saída</h1>;
       default:

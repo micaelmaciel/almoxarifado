@@ -11,35 +11,34 @@ import {
   TextField,
   InputAdornment
 } from '@mui/material';
-
 import SearchIcon from '@mui/icons-material/Search';
 
-export default function BasicTable({ refreshTrigger }) {
-  const [products, setProducts] = useState([]);
+export default function LogTable({ refreshTrigger }) {
+  const [logs, setLogs] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
 
   const columns = [
-    { id: 'code', label: 'Código' },
-    { id: 'name', label: 'Nome' },
+    { id: 'date', label: 'Data' },
+    { id: 'product_name', label: 'Produto' },
     { id: 'quantity', label: 'Quantidade' },
-    { id: 'unit', label: 'Unidade' }
+    { id: 'sector', label: 'Setor' },
+    { id: 'person', label: 'Responsável' }
   ];
 
-
-  const fetchProducts = async () => {
+  const fetchLogs = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/produtos');
+      const response = await fetch('http://localhost:3001/api/add_log');
       const data = await response.json();
-      setProducts(data);
+      setLogs(data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error fetching logs:', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchLogs();
   }, [refreshTrigger]);
 
   const handleChangePage = (event, newPage) => {
@@ -51,34 +50,32 @@ export default function BasicTable({ refreshTrigger }) {
     setPage(0);
   };
   
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.unit.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.code.toString().includes(searchTerm)
+  const filteredLogs = logs.filter((log) =>
+    log.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.person.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.date.includes(searchTerm)
   );
 
-  const paginatedProducts = filteredProducts.slice(
+  const paginatedLogs = filteredLogs.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
 
-
   return (
-    <Paper 
-      sx={{ 
-        width: '100%',
-        overflow: 'hidden',
-        backgroundColor: '#1e1e1e',
-        '& .MuiTableCell-root': {
-          color: 'white',
-          borderColor: 'rgba(255, 255, 255, 0.12)'
-        }
-      }}
-    >
-            <TextField
+    <Paper sx={{ 
+      width: '100%',
+      overflow: 'hidden',
+      backgroundColor: '#1e1e1e',
+      '& .MuiTableCell-root': {
+        color: 'white',
+        borderColor: 'rgba(255, 255, 255, 0.12)'
+      }
+    }}>
+      <TextField
         fullWidth
         variant="outlined"
-        placeholder="Pesquisar produtos..."
+        placeholder="Pesquisar logs..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         sx={{
@@ -106,30 +103,29 @@ export default function BasicTable({ refreshTrigger }) {
         }}
       />
       <TableContainer sx={{ maxHeight: 440 }}>
-      <Table stickyHeader aria-label="sticky table">
-      <TableHead>
-        <TableRow>
-          {columns.map((column) => (
-            <TableCell 
-              key={column.id} 
-              align="center" 
-              sx={{ 
-                color: 'white',
-                backgroundColor: '#1e1e1e !important', // Override sticky header background
-                fontWeight: 'bold'
-              }}
-            >
-              {column.label}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell 
+                  key={column.id} 
+                  align="center"
+                  sx={{ 
+                    backgroundColor: '#1e1e1e !important',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {column.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
           <TableBody>
-            {paginatedProducts.map((product, index) => (
+            {paginatedLogs.map((log, index) => (
               <TableRow hover key={index}>
                 {columns.map((column) => (
-                  <TableCell key={column.id} align='center'>
-                    {product[column.id]}
+                  <TableCell key={column.id} align="center">
+                    {log[column.id]}
                   </TableCell>
                 ))}
               </TableRow>
@@ -140,10 +136,10 @@ export default function BasicTable({ refreshTrigger }) {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={filteredProducts.length}
+        count={filteredLogs.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        labelRowsPerPage="Produtos por página"
+        labelRowsPerPage="Logs por página"
         labelDisplayedRows={({ from, to, count }) =>
           `${from}-${to} de ${count}`
         }
