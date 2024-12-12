@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react'; // Add useEffect
-import Box from '@mui/material/Box';
+import React, { useState, useEffect } from 'react';
+import { Box } from '@mui/material'; // Add this line
 import axios from 'axios';
 
 import Sidebar from './Components/Sidebar';
@@ -10,9 +9,8 @@ import ButtonUsage from './Components/BasicButton';
 import Form from './Components/FormEntrada';
 import FormSaida from './Components/FormSaida';
 import LogTableSaida from './Components/LogTableSaida';
-import FormCadastro from './Components/FormCadastro';  // Add this import
-
-
+import FormCadastro from './Components/FormCadastro';
+import ExportButtonExcel from './Components/ExportButtonExcel';
 
 export function addItem(nome, quantidade, unidade) {
   return axios.post('http://localhost:3001/api/produtos', {
@@ -63,6 +61,9 @@ function App() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openRemove, setOpenRemove] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [products, setProducts] = useState([]); // Move these up
+  const [logs, setLogs] = useState([]);
+  const [removeLogs, setRemoveLogs] = useState([]);
 
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = () => setOpenAdd(false);
@@ -76,6 +77,27 @@ function App() {
   const handleOpenCadastro = () => setOpenCadastro(true);
   const handleCloseCadastro = () => setOpenCadastro(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productsRes = await fetch('http://localhost:3001/api/produtos');
+        const productsData = await productsRes.json();
+        setProducts(productsData);
+
+        const logsRes = await fetch('http://localhost:3001/api/add_log');
+        const logsData = await logsRes.json();
+        setLogs(logsData);
+
+        const removeLogsRes = await fetch('http://localhost:3001/api/remove_log');
+        const removeLogsData = await removeLogsRes.json();
+        setRemoveLogs(removeLogsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [refreshTrigger]);
 
   const renderContent = () => {
     switch (currentPage) {
@@ -89,6 +111,7 @@ function App() {
                 <ButtonUsage onClick={handleOpenCadastro} nome="Cadastrar" />
                 <ButtonUsage onClick={handleOpenAdd} nome="Entrada" />
                 <ButtonUsage onClick={handleOpenRemove} nome="Saída" />
+                <ExportButtonExcel data={products} filename="estoque" />
               </div>
               <FormCadastro 
                 open={openCadastro} 
@@ -116,25 +139,32 @@ function App() {
         case 'entrada':
           return (
             <>
-              <h1>Histórico de entrada</h1>
-              <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
-              <LogTable refreshTrigger={refreshTrigger} />
+            <h1>Histórico de entrada</h1>
+            <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
+              <LogTable refreshTrigger={refreshTrigger}/>
+              <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
+              <ExportButtonExcel data={logs} filename="historico_entrada" />
               </div>
-            </>
+            </div>
+          </>
           );
         case 'saida':
           return (
             <>
-              <h1>Histórico de saída</h1>
-              <div style={{display: 'flex', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
-                <LogTableSaida refreshTrigger={refreshTrigger} />
+            <h1>Histórico de saída</h1>
+            <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
+              <LogTableSaida refreshTrigger={refreshTrigger}/>
+              <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
+              <ExportButtonExcel data={removeLogs} filename="historico_saida" />
               </div>
-            </>
+            </div>
+          </>
           );
       default:
         return <h1>404 Not Found</h1>;
     }
   }
+
 
   return (
     <Box 
@@ -164,5 +194,4 @@ function App() {
     </Box>
   );
 }
-
 export default App;
