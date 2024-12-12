@@ -27,11 +27,11 @@ const style = {
 export default function FormCadastro({ open, handleClose, addItem, onSubmitSuccess }) {
   const [formData, setFormData] = useState({
     nome: '',
-    quantidade: '0',
-    unidade: ''  // This will store the selected unit
+    quantidade: '0', // Default value is '0'
+    unidade: ''
   });
 
-  const units = ["Caixa", "Pacote", "Individual"];
+  const units = ["Caixa", "Pacote", "Unitário"];
 
 
   const handleSubmit = async (e) => {
@@ -59,13 +59,9 @@ export default function FormCadastro({ open, handleClose, addItem, onSubmitSucce
   };
 
   return (
-    <Modal 
-      open={open} 
-      onClose={handleClose}
-      aria-labelledby="modal-title"
-    >
+    <Modal open={open} onClose={handleClose}>
       <Box sx={style}>
-        <Typography id="modal-title" variant="h6" component="h2" mb={2}>
+        <Typography variant="h6" component="h2" mb={2}>
           Cadastrar Produto
         </Typography>
         <form onSubmit={handleSubmit}>
@@ -79,11 +75,18 @@ export default function FormCadastro({ open, handleClose, addItem, onSubmitSucce
             required
             sx={{ input: { color: 'white' }, label: { color: 'white' } }}
           />
-          <FormControl 
-            fullWidth 
+          <TextField
+            fullWidth
+            label="Quantidade"
+            name="quantidade"
+            type="number"
+            value={formData.quantidade}
+            onChange={handleChange}
             margin="normal"
             required
-          >
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
+          />
+          <FormControl fullWidth margin="normal" required>
             <InputLabel sx={{ color: 'white' }}>Unidade</InputLabel>
             <Select
               name="unidade"
@@ -103,10 +106,8 @@ export default function FormCadastro({ open, handleClose, addItem, onSubmitSucce
                 }
               }}
             >
-              {units.map((unit) => (
-                <MenuItem key={unit} value={unit}>
-                  {unit}
-                </MenuItem>
+              {["Caixa", "Pacote", "Individual"].map((unit) => (
+                <MenuItem key={unit} value={unit}>{unit}</MenuItem>
               ))}
             </Select>
           </FormControl>

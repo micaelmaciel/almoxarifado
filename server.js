@@ -97,7 +97,7 @@ app.post('/api/remove_log', (req, res) => {
 app.post('/api/produtos/subtract', (req, res) => {
   try {
     const { nome, quantidade } = req.body;
-    
+
     // First get the current product
     const product = getProductByName.get(nome);
     if (!product) {
@@ -116,9 +116,9 @@ app.post('/api/produtos/subtract', (req, res) => {
       return res.status(500).json({ error: 'Failed to update quantity' });
     }
 
-    res.json({ 
+    res.json({
       message: 'Quantity updated successfully',
-      newQuantity: newQuantity 
+      newQuantity: newQuantity
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -128,7 +128,7 @@ app.post('/api/produtos/subtract', (req, res) => {
 app.post('/api/produtos/add', (req, res) => {
   try {
     const { nome, quantidade } = req.body;
-    
+
     // First get the current product
     const product = getProductByName.get(nome);
     if (!product) {
@@ -141,7 +141,7 @@ app.post('/api/produtos/add', (req, res) => {
       return res.status(500).json({ error: 'Failed to update quantity' });
     }
 
-    res.json({ 
+    res.json({
       message: 'Quantity updated successfully',
       newQuantity: product.quantity + parseInt(quantidade)
     });
@@ -212,7 +212,12 @@ app.delete('/api/produtos/:id', (req, res) => {
   }
 });
 
-ViteExpress.listen(app, port, () => console.log("Server is listening..."));
+
+const server = app.listen(port, "0.0.0.0", () =>
+  console.log("Server is listening...")
+);
+
+ViteExpress.bind(app, server);
 
 // Cleanup on exit
 process.on('SIGINT', () => {

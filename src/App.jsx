@@ -104,7 +104,7 @@ function App() {
       case 'home':
         return (
           <>
-            <h1>Estoque</h1>
+            <h1 style={{color: "white !important"}}>Estoque</h1>
             <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
               <BasicTable refreshTrigger={refreshTrigger}/>
               <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
@@ -139,7 +139,7 @@ function App() {
         case 'entrada':
           return (
             <>
-            <h1>Histórico de entrada</h1>
+            <h1 style={{color: "white !important"}}>Histórico de entrada</h1>
             <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
               <LogTable refreshTrigger={refreshTrigger}/>
               <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
@@ -151,7 +151,7 @@ function App() {
         case 'saida':
           return (
             <>
-            <h1>Histórico de saída</h1>
+            <h1 style={{color: "white !important"}}>Histórico de saída</h1>
             <div style={{display: 'flex', flexDirection: 'row', flexGrow: 1, justifyContent: 'center', alignContent: 'center'}}>
               <LogTableSaida refreshTrigger={refreshTrigger}/>
               <div style={{display: 'flex', flexDirection: 'column', marginLeft: '20px', rowGap: '20px'}}>
